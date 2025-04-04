@@ -1,0 +1,838 @@
+{
+    "metadata": {
+      "version": "1.0",
+      "source": "Feelings Wheel",
+      "description": "Comprehensive emotion hierarchy based on the Feelings Wheel"
+    },
+    "emotionTypes": {
+      "primary": { "id": "primary", "name": "Primary Emotions", "level": 1 },
+      "secondary": { "id": "secondary", "name": "Secondary Emotions", "level": 2 },
+      "tertiary": { "id": "tertiary", "name": "Tertiary Emotions", "level": 3 }
+    },
+    "emotions": {
+      "happy": {
+        "id": "happy",
+        "name": "Happy",
+        "type": "primary",
+        "color": "#F29727"
+      },
+      "sad": {
+        "id": "sad",
+        "name": "Sad",
+        "type": "primary",
+        "color": "#5B4B8A"
+      },
+      "angry": {
+        "id": "angry",
+        "name": "Angry",
+        "type": "primary",
+        "color": "#E94560"
+      },
+      "fearful": {
+        "id": "fearful",
+        "name": "Fearful",
+        "type": "primary",
+        "color": "#D53F8C"
+      },
+      "disgusted": {
+        "id": "disgusted",
+        "name": "Disgusted",
+        "type": "primary",
+        "color": "#A0522D"
+      },
+      "surprised": {
+        "id": "surprised",
+        "name": "Surprised",
+        "type": "primary",
+        "color": "#2D6A4F"
+      },
+      "bad": {
+        "id": "bad",
+        "name": "Bad",
+        "type": "primary",
+        "color": "#4A5568"
+      },
+      
+      "playful": {
+        "id": "playful",
+        "name": "Playful",
+        "type": "secondary",
+        "color": "#F9A826",
+        "parentId": "happy"
+      },
+      "content": {
+        "id": "content",
+        "name": "Content",
+        "type": "secondary",
+        "color": "#F9A826",
+        "parentId": "happy"
+      },
+      "interested": {
+        "id": "interested",
+        "name": "Interested",
+        "type": "secondary",
+        "color": "#F9A826",
+        "parentId": "happy"
+      },
+      "proud": {
+        "id": "proud",
+        "name": "Proud",
+        "type": "secondary",
+        "color": "#F9A826",
+        "parentId": "happy"
+      },
+      "accepted": {
+        "id": "accepted",
+        "name": "Accepted",
+        "type": "secondary",
+        "color": "#F9A826",
+        "parentId": "happy"
+      },
+      "powerful": {
+        "id": "powerful",
+        "name": "Powerful",
+        "type": "secondary",
+        "color": "#F9A826",
+        "parentId": "happy"
+      },
+      "peaceful": {
+        "id": "peaceful",
+        "name": "Peaceful",
+        "type": "secondary",
+        "color": "#F9A826",
+        "parentId": "happy"
+      },
+      "trusting": {
+        "id": "trusting",
+        "name": "Trusting",
+        "type": "secondary",
+        "color": "#F9A826",
+        "parentId": "happy"
+      },
+      "optimistic": {
+        "id": "optimistic",
+        "name": "Optimistic",
+        "type": "secondary",
+        "color": "#F9A826",
+        "parentId": "happy"
+      },
+      
+      "lonely": {
+        "id": "lonely",
+        "name": "Lonely",
+        "type": "secondary",
+        "color": "#5B4B8A",
+        "parentId": "sad"
+      },
+      "vulnerable": {
+        "id": "vulnerable",
+        "name": "Vulnerable",
+        "type": "secondary",
+        "color": "#5B4B8A",
+        "parentId": "sad"
+      },
+      "despair": {
+        "id": "despair",
+        "name": "Despair",
+        "type": "secondary",
+        "color": "#5B4B8A",
+        "parentId": "sad"
+      },
+      "guilty": {
+        "id": "guilty",
+        "name": "Guilty",
+        "type": "secondary",
+        "color": "#5B4B8A",
+        "parentId": "sad"
+      },
+      "depressed": {
+        "id": "depressed",
+        "name": "Depressed",
+        "type": "secondary",
+        "color": "#5B4B8A",
+        "parentId": "sad"
+      },
+      "hurt": {
+        "id": "hurt",
+        "name": "Hurt",
+        "type": "secondary",
+        "color": "#5B4B8A",
+        "parentId": "sad"
+      },
+      
+      "threatened": {
+        "id": "threatened",
+        "name": "Threatened",
+        "type": "secondary",
+        "color": "#D53F8C",
+        "parentId": "fearful"
+      },
+      "rejected": {
+        "id": "rejected",
+        "name": "Rejected",
+        "type": "secondary",
+        "color": "#D53F8C",
+        "parentId": "fearful"
+      },
+      "weak": {
+        "id": "weak",
+        "name": "Weak",
+        "type": "secondary",
+        "color": "#D53F8C",
+        "parentId": "fearful"
+      },
+      "insecure": {
+        "id": "insecure",
+        "name": "Insecure",
+        "type": "secondary",
+        "color": "#D53F8C",
+        "parentId": "fearful"
+      },
+      "anxious": {
+        "id": "anxious",
+        "name": "Anxious",
+        "type": "secondary",
+        "color": "#D53F8C",
+        "parentId": "fearful"
+      },
+      "scared": {
+        "id": "scared",
+        "name": "Scared",
+        "type": "secondary",
+        "color": "#D53F8C",
+        "parentId": "fearful"
+      },
+      
+      "busy": {
+        "id": "busy",
+        "name": "Busy",
+        "type": "secondary",
+        "color": "#4A5568",
+        "parentId": "bad"
+      },
+      "stressed": {
+        "id": "stressed",
+        "name": "Stressed",
+        "type": "secondary",
+        "color": "#4A5568",
+        "parentId": "bad"
+      },
+      "tired": {
+        "id": "tired",
+        "name": "Tired",
+        "type": "secondary",
+        "color": "#4A5568",
+        "parentId": "bad"
+      },
+      "bored": {
+        "id": "bored",
+        "name": "Bored",
+        "type": "secondary",
+        "color": "#4A5568",
+        "parentId": "bad"
+      },
+      
+      "confused": {
+        "id": "confused",
+        "name": "Confused",
+        "type": "secondary",
+        "color": "#2D6A4F",
+        "parentId": "surprised"
+      },
+      "amazed": {
+        "id": "amazed",
+        "name": "Amazed",
+        "type": "secondary",
+        "color": "#2D6A4F",
+        "parentId": "surprised"
+      },
+      "excited": {
+        "id": "excited",
+        "name": "Excited",
+        "type": "secondary",
+        "color": "#2D6A4F",
+        "parentId": "surprised"
+      },
+      "startled": {
+        "id": "startled",
+        "name": "Startled",
+        "type": "secondary",
+        "color": "#2D6A4F",
+        "parentId": "surprised"
+      },
+      
+      "let_down": {
+        "id": "let_down",
+        "name": "Let Down",
+        "type": "secondary",
+        "color": "#A0522D",
+        "parentId": "disgusted"
+      },
+      "disapproving": {
+        "id": "disapproving",
+        "name": "Disapproving",
+        "type": "secondary",
+        "color": "#A0522D",
+        "parentId": "disgusted"
+      },
+      "disappointed": {
+        "id": "disappointed",
+        "name": "Disappointed",
+        "type": "secondary",
+        "color": "#A0522D",
+        "parentId": "disgusted"
+      },
+      "awful": {
+        "id": "awful",
+        "name": "Awful",
+        "type": "secondary",
+        "color": "#A0522D",
+        "parentId": "disgusted"
+      },
+      "repelled": {
+        "id": "repelled",
+        "name": "Repelled",
+        "type": "secondary",
+        "color": "#A0522D",
+        "parentId": "disgusted"
+      },
+      
+      "humiliated": {
+        "id": "humiliated",
+        "name": "Humiliated",
+        "type": "secondary",
+        "color": "#E94560",
+        "parentId": "angry"
+      },
+      "bitter": {
+        "id": "bitter",
+        "name": "Bitter",
+        "type": "secondary",
+        "color": "#E94560",
+        "parentId": "angry"
+      },
+      "mad": {
+        "id": "mad",
+        "name": "Mad",
+        "type": "secondary",
+        "color": "#E94560",
+        "parentId": "angry"
+      },
+      "aggressive": {
+        "id": "aggressive",
+        "name": "Aggressive",
+        "type": "secondary",
+        "color": "#E94560",
+        "parentId": "angry"
+      },
+      "frustrated": {
+        "id": "frustrated",
+        "name": "Frustrated",
+        "type": "secondary",
+        "color": "#E94560",
+        "parentId": "angry"
+      },
+      "distant": {
+        "id": "distant",
+        "name": "Distant",
+        "type": "secondary",
+        "color": "#E94560",
+        "parentId": "angry"
+      },
+      "critical": {
+        "id": "critical",
+        "name": "Critical",
+        "type": "secondary",
+        "color": "#E94560",
+        "parentId": "angry"
+      },
+      
+      "aroused": {
+        "id": "aroused",
+        "name": "Aroused",
+        "type": "tertiary",
+        "parentId": "playful"
+      },
+      "cheeky": {
+        "id": "cheeky",
+        "name": "Cheeky",
+        "type": "tertiary",
+        "parentId": "playful"
+      },
+      "free": {
+        "id": "free",
+        "name": "Free",
+        "type": "tertiary",
+        "parentId": "playful"
+      },
+      "joyful": {
+        "id": "joyful",
+        "name": "Joyful",
+        "type": "tertiary",
+        "parentId": "playful"
+      },
+      "curious": {
+        "id": "curious",
+        "name": "Curious",
+        "type": "tertiary",
+        "parentId": "interested"
+      },
+      "inquisitive": {
+        "id": "inquisitive",
+        "name": "Inquisitive",
+        "type": "tertiary",
+        "parentId": "interested"
+      },
+      "successful": {
+        "id": "successful",
+        "name": "Successful",
+        "type": "tertiary",
+        "parentId": "proud"
+      },
+      "confident": {
+        "id": "confident",
+        "name": "Confident",
+        "type": "tertiary",
+        "parentId": "proud"
+      },
+      "respected": {
+        "id": "respected",
+        "name": "Respected",
+        "type": "tertiary",
+        "parentId": "powerful"
+      },
+      "valued": {
+        "id": "valued",
+        "name": "Valued",
+        "type": "tertiary",
+        "parentId": "powerful"
+      },
+      "courageous": {
+        "id": "courageous",
+        "name": "Courageous",
+        "type": "tertiary",
+        "parentId": "powerful"
+      },
+      "creative": {
+        "id": "creative",
+        "name": "Creative",
+        "type": "tertiary",
+        "parentId": "peaceful"
+      },
+      "loving": {
+        "id": "loving",
+        "name": "Loving",
+        "type": "tertiary",
+        "parentId": "peaceful"
+      },
+      "thankful": {
+        "id": "thankful",
+        "name": "Thankful",
+        "type": "tertiary",
+        "parentId": "peaceful"
+      },
+      "sensitive": {
+        "id": "sensitive",
+        "name": "Sensitive",
+        "type": "tertiary",
+        "parentId": "peaceful"
+      },
+      "intimate": {
+        "id": "intimate",
+        "name": "Intimate",
+        "type": "tertiary",
+        "parentId": "trusting"
+      },
+      "hopeful": {
+        "id": "hopeful",
+        "name": "Hopeful",
+        "type": "tertiary",
+        "parentId": "optimistic"
+      },
+      "inspired": {
+        "id": "inspired",
+        "name": "Inspired",
+        "type": "tertiary",
+        "parentId": "optimistic"
+      },
+      
+      "isolated": {
+        "id": "isolated",
+        "name": "Isolated",
+        "type": "tertiary",
+        "parentId": "lonely"
+      },
+      "abandoned": {
+        "id": "abandoned",
+        "name": "Abandoned",
+        "type": "tertiary",
+        "parentId": "lonely"
+      },
+      "victimized": {
+        "id": "victimized",
+        "name": "Victimized",
+        "type": "tertiary",
+        "parentId": "vulnerable"
+      },
+      "fragile": {
+        "id": "fragile",
+        "name": "Fragile",
+        "type": "tertiary",
+        "parentId": "vulnerable"
+      },
+      "grief": {
+        "id": "grief",
+        "name": "Grief",
+        "type": "tertiary",
+        "parentId": "despair"
+      },
+      "powerless": {
+        "id": "powerless",
+        "name": "Powerless",
+        "type": "tertiary",
+        "parentId": "despair"
+      },
+      "ashamed": {
+        "id": "ashamed",
+        "name": "Ashamed",
+        "type": "tertiary",
+        "parentId": "guilty"
+      },
+      "remorseful": {
+        "id": "remorseful",
+        "name": "Remorseful",
+        "type": "tertiary",
+        "parentId": "guilty"
+      },
+      "empty": {
+        "id": "empty",
+        "name": "Empty",
+        "type": "tertiary",
+        "parentId": "depressed"
+      },
+      "inferior": {
+        "id": "inferior",
+        "name": "Inferior",
+        "type": "tertiary",
+        "parentId": "depressed"
+      },
+      "embarrassed": {
+        "id": "embarrassed",
+        "name": "Embarrassed",
+        "type": "tertiary",
+        "parentId": "hurt"
+      },
+      "disappointed": {
+        "id": "disappointed",
+        "name": "Disappointed",
+        "type": "tertiary",
+        "parentId": "hurt"
+      },
+      
+      "nervous": {
+        "id": "nervous",
+        "name": "Nervous",
+        "type": "tertiary",
+        "parentId": "threatened"
+      },
+      "exposed": {
+        "id": "exposed",
+        "name": "Exposed",
+        "type": "tertiary",
+        "parentId": "threatened"
+      },
+      "persecuted": {
+        "id": "persecuted",
+        "name": "Persecuted",
+        "type": "tertiary",
+        "parentId": "rejected"
+      },
+      "excluded": {
+        "id": "excluded",
+        "name": "Excluded",
+        "type": "tertiary",
+        "parentId": "rejected"
+      },
+      "insignificant": {
+        "id": "insignificant",
+        "name": "Insignificant",
+        "type": "tertiary",
+        "parentId": "weak"
+      },
+      "worthless": {
+        "id": "worthless",
+        "name": "Worthless",
+        "type": "tertiary",
+        "parentId": "weak"
+      },
+      "inadequate": {
+        "id": "inadequate",
+        "name": "Inadequate",
+        "type": "tertiary",
+        "parentId": "insecure"
+      },
+      "inferior": {
+        "id": "inferior",
+        "name": "Inferior",
+        "type": "tertiary",
+        "parentId": "insecure"
+      },
+      "worried": {
+        "id": "worried",
+        "name": "Worried",
+        "type": "tertiary",
+        "parentId": "anxious"
+      },
+      "overwhelmed": {
+        "id": "overwhelmed",
+        "name": "Overwhelmed",
+        "type": "tertiary",
+        "parentId": "anxious"
+      },
+      "frightened": {
+        "id": "frightened",
+        "name": "Frightened",
+        "type": "tertiary",
+        "parentId": "scared"
+      },
+      "helpless": {
+        "id": "helpless",
+        "name": "Helpless",
+        "type": "tertiary",
+        "parentId": "scared"
+      },
+      
+      "pressured": {
+        "id": "pressured",
+        "name": "Pressured",
+        "type": "tertiary",
+        "parentId": "stressed"
+      },
+      "rushed": {
+        "id": "rushed",
+        "name": "Rushed",
+        "type": "tertiary",
+        "parentId": "stressed"
+      },
+      "overwhelmed": {
+        "id": "overwhelmed",
+        "name": "Overwhelmed",
+        "type": "tertiary",
+        "parentId": "stressed"
+      },
+      "out_of_control": {
+        "id": "out_of_control",
+        "name": "Out of Control",
+        "type": "tertiary",
+        "parentId": "stressed"
+      },
+      
+      "indifferent": {
+        "id": "indifferent",
+        "name": "Indifferent",
+        "type": "tertiary",
+        "parentId": "bored"
+      },
+      "apathetic": {
+        "id": "apathetic",
+        "name": "Apathetic",
+        "type": "tertiary",
+        "parentId": "bored"
+      },
+      
+      "disillusioned": {
+        "id": "disillusioned",
+        "name": "Disillusioned",
+        "type": "tertiary",
+        "parentId": "confused"
+      },
+      "perplexed": {
+        "id": "perplexed",
+        "name": "Perplexed",
+        "type": "tertiary",
+        "parentId": "confused"
+      },
+      "astonished": {
+        "id": "astonished",
+        "name": "Astonished",
+        "type": "tertiary",
+        "parentId": "amazed"
+      },
+      "awe": {
+        "id": "awe",
+        "name": "Awe",
+        "type": "tertiary",
+        "parentId": "amazed"
+      },
+      "eager": {
+        "id": "eager",
+        "name": "Eager",
+        "type": "tertiary",
+        "parentId": "excited"
+      },
+      "energetic": {
+        "id": "energetic",
+        "name": "Energetic",
+        "type": "tertiary",
+        "parentId": "excited"
+      },
+      "shocked": {
+        "id": "shocked",
+        "name": "Shocked",
+        "type": "tertiary",
+        "parentId": "startled"
+      },
+      "dismayed": {
+        "id": "dismayed",
+        "name": "Dismayed",
+        "type": "tertiary",
+        "parentId": "startled"
+      },
+      
+      "betrayed": {
+        "id": "betrayed",
+        "name": "Betrayed",
+        "type": "tertiary",
+        "parentId": "let_down"
+      },
+      "resentful": {
+        "id": "resentful",
+        "name": "Resentful",
+        "type": "tertiary",
+        "parentId": "let_down"
+      },
+      "disrespected": {
+        "id": "disrespected",
+        "name": "Disrespected",
+        "type": "tertiary",
+        "parentId": "disapproving"
+      },
+      "ridiculed": {
+        "id": "ridiculed",
+        "name": "Ridiculed",
+        "type": "tertiary",
+        "parentId": "disapproving"
+      },
+      "indignant": {
+        "id": "indignant",
+        "name": "Indignant",
+        "type": "tertiary",
+        "parentId": "disapproving"
+      },
+      "horrified": {
+        "id": "horrified",
+        "name": "Horrified",
+        "type": "tertiary",
+        "parentId": "awful"
+      },
+      "detestable": {
+        "id": "detestable",
+        "name": "Detestable",
+        "type": "tertiary",
+        "parentId": "awful"
+      },
+      "nauseated": {
+        "id": "nauseated",
+        "name": "Nauseated",
+        "type": "tertiary",
+        "parentId": "repelled"
+      },
+      "revolted": {
+        "id": "revolted",
+        "name": "Revolted",
+        "type": "tertiary",
+        "parentId": "repelled"
+      },
+      "appalled": {
+        "id": "appalled",
+        "name": "Appalled",
+        "type": "tertiary",
+        "parentId": "repelled"
+      },
+      
+      "disrespected": {
+        "id": "disrespected",
+        "name": "Disrespected",
+        "type": "tertiary",
+        "parentId": "humiliated"
+      },
+      "ridiculed": {
+        "id": "ridiculed",
+        "name": "Ridiculed",
+        "type": "tertiary",
+        "parentId": "humiliated"
+      },
+      "violated": {
+        "id": "violated",
+        "name": "Violated",
+        "type": "tertiary",
+        "parentId": "bitter"
+      },
+      "furious": {
+        "id": "furious",
+        "name": "Furious",
+        "type": "tertiary",
+        "parentId": "mad"
+      },
+      "jealous": {
+        "id": "jealous",
+        "name": "Jealous",
+        "type": "tertiary",
+        "parentId": "mad"
+      },
+      "provoked": {
+        "id": "provoked",
+        "name": "Provoked",
+        "type": "tertiary",
+        "parentId": "aggressive"
+      },
+      "hostile": {
+        "id": "hostile",
+        "name": "Hostile",
+        "type": "tertiary",
+        "parentId": "aggressive"
+      },
+      "infuriated": {
+        "id": "infuriated",
+        "name": "Infuriated",
+        "type": "tertiary",
+        "parentId": "frustrated"
+      },
+      "annoyed": {
+        "id": "annoyed",
+        "name": "Annoyed",
+        "type": "tertiary",
+        "parentId": "frustrated"
+      },
+      "withdrawn": {
+        "id": "withdrawn",
+        "name": "Withdrawn",
+        "type": "tertiary",
+        "parentId": "distant"
+      },
+      "numb": {
+        "id": "numb",
+        "name": "Numb",
+        "type": "tertiary",
+        "parentId": "distant"
+      },
+      "skeptical": {
+        "id": "skeptical",
+        "name": "Skeptical",
+        "type": "tertiary",
+        "parentId": "critical"
+      },
+      "dismissive": {
+        "id": "dismissive",
+        "name": "Dismissive",
+        "type": "tertiary",
+        "parentId": "critical"
+      },
+      "judgmental": {
+        "id": "judgmental",
+        "name": "Judgmental",
+        "type": "tertiary",
+        "parentId": "critical"
+      }
+    }
+  }
