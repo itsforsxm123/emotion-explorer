@@ -1,4 +1,4 @@
-module emotion-explorer
+module github.com/itsforsxm123/emotion-explorer
 
 go 1.24.1
 
