@@ -9,330 +9,418 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/dialog" // <-- Import dialog
+	"fyne.io/fyne/v2/container" // Import container
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/layout" // Import layout
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget" // Import widget
 
 	// Use your actual module path here
 	"github.com/itsforsxm123/emotion-explorer/internal/core"
 	"github.com/itsforsxm123/emotion-explorer/internal/data"
-	"github.com/itsforsxm123/emotion-explorer/internal/journal" // Ensure journal is imported
+	"github.com/itsforsxm123/emotion-explorer/internal/journal"
 	"github.com/itsforsxm123/emotion-explorer/internal/ui"
 )
 
 // --- Application State ---
-type AppMode string
+
+// AppMode defines the current operational mode of the application.
+type AppMode int // Use int for enums, it's more idiomatic Go
 
 const (
-	ModeBrowsing AppMode = "browsing"
-	ModeLogging  AppMode = "logging"
+	ModeBrowsing AppMode = iota // Default mode: exploring emotions.
+	ModeLogging                 // Mode for selecting an emotion to log.
+)
+
+const (
+	appName         = "Emotion Explorer"
+	logModeTitle    = appName + " - Logging..."
+	browseModeTitle = appName
 )
 
 var (
-	emotionData     data.EmotionData
-	primaryEmotions []data.Emotion
-	mainWindow      fyne.Window
-	myApp           fyne.App
-	currentMode     AppMode = ModeBrowsing // Initialize in browsing mode
+	// Core App Components
+	myApp      fyne.App
+	mainWindow fyne.Window
+
+	// Data
+	emotionData     data.EmotionData // Consider if this needs to be global or passed around
+	primaryEmotions []data.Emotion   // Cache primary emotions
+
+	// UI Elements
+	backButton       *widget.Button
+	mainContentArea  *fyne.Container // The container holding the current view (center of border)
+	mainBorderLayout *fyne.Container
+
+	// State Management
+	currentMode            AppMode              = ModeBrowsing
+	navigationStack        *[]fyne.CanvasObject // Stack for browsing views
+	loggingNavigationStack *[]fyne.CanvasObject // Stack for logging views
 )
 
-// --- Navigation/Callback Functions ---
-// We will need to adapt these or create new ones for logging mode later
-// ... (Keep existing functions for now) ...
-func handlePrimaryEmotionSelected(selectedPrimary data.Emotion) {
-	// This is the BROWSING mode handler
-	if currentMode != ModeBrowsing {
-		log.Println("Warning: handlePrimaryEmotionSelected called while not in browsing mode.")
-		return // Or handle differently if needed
-	}
-	log.Printf("[Browse] Navigating from Primary: Selected '%s' (ID: %s)\n", selectedPrimary.Name, selectedPrimary.ID)
-	secondaryChildren := core.GetChildrenOf(selectedPrimary.ID, emotionData.Emotions)
-	log.Printf("[Browse] Found %d children for '%s'.\n", len(secondaryChildren), selectedPrimary.Name)
-	secondaryView := ui.CreateEmotionListView(
-		fmt.Sprintf("Exploring: %s", selectedPrimary.Name),
-		&selectedPrimary,
-		secondaryChildren,
-		func(clickedSecondary data.Emotion) {
-			handleSecondaryEmotionSelected(selectedPrimary, clickedSecondary) // Still uses browsing handler
-		},
-		navigateBackToPrimary, // Browsing back handler
-		"<- Back to Primary",
-	)
-	log.Println("[Browse] Setting window content to Secondary View...")
-	mainWindow.SetContent(secondaryView)
-}
-func handleSecondaryEmotionSelected(primaryParent data.Emotion, selectedSecondary data.Emotion) {
-	// This is the BROWSING mode handler
-	if currentMode != ModeBrowsing {
-		log.Println("Warning: handleSecondaryEmotionSelected called while not in browsing mode.")
-		return
-	}
-	log.Printf("[Browse] Navigating from Secondary: Selected '%s' (ID: %s, Primary Parent: '%s')\n",
-		selectedSecondary.Name, selectedSecondary.ID, primaryParent.Name)
-	tertiaryChildren := core.GetChildrenOf(selectedSecondary.ID, emotionData.Emotions)
-	log.Printf("[Browse] Found %d children for '%s'.\n", len(tertiaryChildren), selectedSecondary.Name)
-	if len(tertiaryChildren) > 0 {
-		log.Printf("[Browse] Navigating to Tertiary View for '%s'...", selectedSecondary.Name)
-		tertiaryView := ui.CreateEmotionListView(
-			fmt.Sprintf("Exploring under: %s", selectedSecondary.Name),
-			&selectedSecondary,
-			tertiaryChildren,
-			func(clickedTertiary data.Emotion) {
-				handleTertiaryEmotionSelected(selectedSecondary, clickedTertiary) // Still uses browsing handler
-			},
-			func() {
-				navigateBackToSecondary(primaryParent) // Browsing back handler
-			},
-			"<- Back to Secondary",
-		)
-		mainWindow.SetContent(tertiaryView)
-	} else {
-		log.Printf("[Browse] Leaf Node: No further children found for '%s'. (Detail view TBD)\n", selectedSecondary.Name)
-	}
-}
-func handleTertiaryEmotionSelected(secondaryParent data.Emotion, selectedTertiary data.Emotion) {
-	// This is the BROWSING mode handler
-	if currentMode != ModeBrowsing {
-		log.Println("Warning: handleTertiaryEmotionSelected called while not in browsing mode.")
-		return
-	}
-	log.Printf("[Browse] Tertiary Button Clicked: '%s' (ID: %s, Secondary Parent: '%s'). No further navigation.\n",
-		selectedTertiary.Name, selectedTertiary.ID, secondaryParent.Name)
-}
-func navigateBackToPrimary() {
-	// This is the BROWSING mode handler
-	if currentMode != ModeBrowsing {
-		log.Println("Warning: navigateBackToPrimary called while not in browsing mode.")
-		// If called during logging, maybe treat as cancel? For now, just log.
-		return
-	}
-	log.Println("[Browse] Navigating back to Primary View...")
-	// Re-create Primary View using Generic Function for BROWSING
-	primaryView := createBrowsingPrimaryView() // Use helper
-	log.Println("[Browse] Setting window content back to Primary View...")
-	mainWindow.SetContent(primaryView)
-}
-func navigateBackToSecondary(primaryParent data.Emotion) {
-	// This is the BROWSING mode handler
-	if currentMode != ModeBrowsing {
-		log.Println("Warning: navigateBackToSecondary called while not in browsing mode.")
-		return
-	}
-	log.Printf("[Browse] Navigating back to Secondary View (Parent: '%s')...", primaryParent.Name)
-	secondaryChildren := core.GetChildrenOf(primaryParent.ID, emotionData.Emotions)
-	secondaryView := ui.CreateEmotionListView(
-		fmt.Sprintf("Exploring: %s", primaryParent.Name),
-		&primaryParent,
-		secondaryChildren,
-		func(clickedSecondary data.Emotion) {
-			handleSecondaryEmotionSelected(primaryParent, clickedSecondary) // Browsing handler
-		},
-		navigateBackToPrimary, // Browsing back handler
-		"<- Back to Primary",
-	)
-	log.Println("[Browse] Setting window content back to Secondary View...")
-	mainWindow.SetContent(secondaryView)
-}
-
-// --- View Creation Helpers ---
-
-// createBrowsingPrimaryView creates the main view for browsing emotions
-func createBrowsingPrimaryView() fyne.CanvasObject {
-	log.Println("Creating browsing primary view...")
-	return ui.CreateEmotionListView(
-		"Primary Emotions",           // Title
-		nil,                          // Parent context
-		primaryEmotions,              // Emotions
-		handlePrimaryEmotionSelected, // Use BROWSING handler
-		nil,                          // No back button from primary browsing
-		"",                           // Back button label (not used)
-	)
-}
-
-// showLoggingSelectionView will display the UI for selecting an emotion to log
-// (We will implement the actual view creation logic in the next step)
-func showLoggingSelectionView() {
-	log.Println("Switching to Logging Mode - Showing emotion selection view (TBD)...")
-	currentMode = ModeLogging
-	// TODO: Replace this with the actual logging selection view
-	// For now, just show primary emotions again, but with a different title/context
-	// We need new handlers for logging mode clicks.
-	placeholderView := ui.CreateEmotionListView(
-		"Select Emotion to Log",  // New Title
-		nil,                      // Parent context
-		primaryEmotions,          // Start with primary emotions
-		handleLogEmotionSelected, // Use NEW LOGGING handler
-		cancelLogging,            // Use NEW CANCEL handler for back button
-		"Cancel Logging",         // Back button label
-	)
-
-	mainWindow.SetTitle("Emotion Explorer - Logging") // Update window title
-	mainWindow.SetContent(placeholderView)
-}
-
-// cancelLogging is called when the user cancels the logging process
-func cancelLogging() {
-	log.Println("Logging cancelled by user.")
-	currentMode = ModeBrowsing
-	mainWindow.SetTitle("Emotion Explorer")            // Reset window title
-	mainWindow.SetContent(createBrowsingPrimaryView()) // Go back to browsing view
-}
-
-// handleLogEmotionSelected is the callback for when an emotion is selected in LOGGING mode
-// (This is a placeholder - needs full implementation)
-func handleLogEmotionSelected(selectedEmotion data.Emotion) {
-	log.Printf("[Log Mode] Emotion selected: %s", selectedEmotion.Name)
-
-	children := core.GetChildrenOf(selectedEmotion.ID, emotionData.Emotions)
-
-	if len(children) == 0 {
-		// *** This is a LEAF node - LOG IT! ***
-		log.Printf("[Log Mode] Leaf emotion '%s' selected. Saving...", selectedEmotion.Name)
-
-		entryToSave := journal.LogEntry{
-			Timestamp:   time.Now(),
-			EmotionID:   selectedEmotion.ID,
-			EmotionName: selectedEmotion.Name,
-			Notes:       "", // TODO: Add notes field later
-		}
-
-		err := journal.SaveLogEntry(entryToSave)
-		if err != nil {
-			log.Printf("ERROR: Failed to save log entry: %v", err)
-			dialog.ShowError(fmt.Errorf("failed to save journal entry: %w", err), mainWindow)
-		} else {
-			log.Println("[Log Mode] Log entry saved successfully.")
-			dialog.ShowInformation("Success", fmt.Sprintf("Logged '%s'", selectedEmotion.Name), mainWindow)
-		}
-
-		// --- Return to browsing mode ---
-		currentMode = ModeBrowsing
-		mainWindow.SetTitle("Emotion Explorer")
-		mainWindow.SetContent(createBrowsingPrimaryView())
-		// ---
-
-	} else {
-		// *** Not a leaf node - navigate deeper within logging mode ***
-		log.Printf("[Log Mode] Navigating deeper from '%s'...", selectedEmotion.Name)
-		// Need to show the children using the *logging* handlers
-		loggingChildView := ui.CreateEmotionListView(
-			fmt.Sprintf("Select under: %s", selectedEmotion.Name), // Title
-			&selectedEmotion,         // Parent context
-			children,                 // Emotions to display
-			handleLogEmotionSelected, // Recursive call to LOGGING handler
-			func() { // Go back within logging mode
-				// If we go back from secondary log selection, show primary log selection
-				// If we go back from tertiary log selection, show secondary log selection
-				// For now, simplify: going back always goes to primary log selection
-				// TODO: Implement proper back navigation within logging mode
-				showLoggingSelectionView() // Go back to top level logging selection
-			},
-			"<- Back / Cancel", // Back button label
-		)
-		mainWindow.SetContent(loggingChildView)
-	}
-}
-
-// --- Main Function ---
+// --- Initialization ---
 
 func main() {
-	// --- 1. Load Emotion Data --- (No changes)
-	// ...
+	// 1. Initialize App and Load Data
+	myApp = app.New()
+	mainWindow = myApp.NewWindow(browseModeTitle) // Initial title
+
+	if err := loadData(); err != nil {
+		// Consider showing a dialog even before the main window is fully set up
+		log.Printf("FATAL: Failed to load emotion data: %v\n", err)
+		// dialog.ShowError(err, mainWindow) // This might fail if mainWindow isn't ready
+		fmt.Fprintf(os.Stderr, "Error loading emotion data: %v\n", err) // Fallback to stderr
+		os.Exit(1)
+	}
+
+	// 2. Initialize Navigation Stacks
+	navStack := make([]fyne.CanvasObject, 0, 5) // Pre-allocate some capacity
+	navigationStack = &navStack
+	logNavStack := make([]fyne.CanvasObject, 0, 5)
+	loggingNavigationStack = &logNavStack
+
+	// 3. Setup Core UI Layout
+	setupMainLayout() // Creates the border layout with back button and content area
+
+	// 4. Push Initial View (Browsing Primary Emotions)
+	initialBrowsingView := createEmotionListView("Primary Emotions", nil, primaryEmotions, handleEmotionSelected)
+	pushView(initialBrowsingView, navigationStack) // Push to browsing stack initially
+
+	// 5. Setup System Tray & Window Behavior
+	setupSystemTray()
+	setupWindowIntercepts()
+
+	// 6. Resize, Center, Show, and Run
+	mainWindow.Resize(fyne.NewSize(400, 500)) // Adjusted size
+	mainWindow.CenterOnScreen()
+	mainWindow.ShowAndRun()
+
+	log.Println("Application finished.")
+}
+
+// loadData encapsulates the emotion data loading logic.
+func loadData() error {
 	log.Println("Loading emotion data...")
 	var err error
 	emotionData, err = data.LoadEmotions()
 	if err != nil {
-		log.Printf("FATAL: Failed to load emotion data: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to load emotions: %w", err)
 	}
 	log.Printf("Successfully loaded emotion data. Version: %s", emotionData.Metadata.Version)
 	log.Printf("Found %d total emotions defined.", len(emotionData.Emotions))
 
-	// --- 2. Initialize Fyne App --- (No changes)
-	myApp = app.New()
-	mainWindow = myApp.NewWindow("Emotion Explorer") // Initial title
-
-	// --- 3. Get Primary Emotions --- (No changes)
-	// ...
 	log.Println("Extracting primary emotions...")
-	primaryEmotions = core.GetPrimaryEmotions(emotionData.Emotions)
+	primaryEmotions = core.GetPrimaryEmotions(emotionData.Emotions) // Use loaded data
 	log.Printf("Found %d primary emotions.", len(primaryEmotions))
 	if len(primaryEmotions) == 0 {
 		log.Println("Warning: No primary emotions found. Check emotions.json.")
 	}
+	return nil
+}
 
-	// --- 4. Create the INITIAL UI View (Browsing Mode) ---
-	initialBrowsingView := createBrowsingPrimaryView() // Use helper
+// setupMainLayout creates the main window structure (border layout).
+func setupMainLayout() {
+	backButton = widget.NewButtonWithIcon("", theme.NavigateBackIcon(), handleBack) // Use icon
+	backButton.Disable()                                                            // Start disabled
 
-	// --- 5. Set Initial Window Content and Size --- (No changes)
-	// ...
-	log.Println("Setting initial window content (Browsing Mode)...")
-	mainWindow.SetContent(initialBrowsingView)
-	mainWindow.Resize(fyne.NewSize(600, 400))
-	mainWindow.CenterOnScreen()
+	// This container will hold the dynamic content (emotion lists)
+	mainContentArea = container.NewMax() // Use Max layout to fill available space
 
-	// --- 6. System Tray Setup ---
+	// Create the main border layout
+	border := container.NewBorder(
+		container.NewHBox(backButton, layout.NewSpacer()), // Top: Back button aligned left
+		nil,             // Bottom
+		nil,             // Left
+		nil,             // Right
+		mainContentArea, // Center: Dynamic content goes here
+	)
+	mainBorderLayout = border // Store reference if needed, though direct access via mainWindow.Content() works
+	mainWindow.SetContent(border)
+	log.Println("Main layout setup complete.")
+}
+
+// --- Navigation Stack Management ---
+
+// pushView adds a new view to the specified navigation stack and updates the UI.
+func pushView(view fyne.CanvasObject, stack *[]fyne.CanvasObject) {
+	*stack = append(*stack, view)
+	log.Printf("Pushed view. Stack size: %d. Mode: %v", len(*stack), currentMode)
+	updateContentFromActiveStack() // Update content based on the active stack
+	updateBackButtonState()        // Update button state after push
+}
+
+// popView removes the top view from the specified navigation stack and updates the UI.
+// Returns true if a pop occurred, false if the stack was empty or had only one item.
+func popView(stack *[]fyne.CanvasObject) bool {
+	if len(*stack) <= 1 {
+		log.Printf("Pop requested on stack with size %d. Cannot pop.", len(*stack))
+		return false // Cannot pop the last view
+	}
+	*stack = (*stack)[:len(*stack)-1] // Pop the last element
+	log.Printf("Popped view. Stack size: %d. Mode: %v", len(*stack), currentMode)
+	updateContentFromActiveStack() // Update content based on the active stack
+	updateBackButtonState()        // Update button state after pop
+	return true
+}
+
+// --- UI Update Logic ---
+
+// updateContentFromActiveStack sets the main content area based on the top of the active stack.
+func updateContentFromActiveStack() {
+	var activeStack *[]fyne.CanvasObject
+	if currentMode == ModeLogging {
+		activeStack = loggingNavigationStack
+	} else {
+		activeStack = navigationStack
+	}
+
+	if len(*activeStack) == 0 {
+		log.Println("Error: Active stack is empty, cannot update content.")
+		// Show an error message or a placeholder in the UI?
+		mainContentArea.Objects = []fyne.CanvasObject{widget.NewLabel("Error: No view available.")}
+		mainContentArea.Refresh()
+		return
+	}
+
+	// Get the top view from the active stack
+	topView := (*activeStack)[len(*activeStack)-1]
+
+	// Update the main content area
+	mainContentArea.Objects = []fyne.CanvasObject{topView} // Replace objects in Max container
+	mainContentArea.Refresh()
+	log.Println("Main content area updated.")
+}
+
+// updateBackButtonState enables/disables the back button based on the active stack size.
+func updateBackButtonState() {
+	var activeStack *[]fyne.CanvasObject
+	if currentMode == ModeLogging {
+		activeStack = loggingNavigationStack
+	} else {
+		activeStack = navigationStack
+	}
+
+	if len(*activeStack) <= 1 {
+		backButton.Disable()
+		log.Println("Back button disabled.")
+	} else {
+		backButton.Enable()
+		log.Println("Back button enabled.")
+	}
+}
+
+// --- Event Handlers ---
+
+// handleBack manages the back navigation logic for both modes.
+func handleBack() {
+	log.Println("Back button clicked.")
+	if currentMode == ModeLogging {
+		if !popView(loggingNavigationStack) {
+			// If pop failed (we are at the root of logging), treat as cancel
+			log.Println("Back clicked at root of logging stack. Cancelling logging.")
+			switchToBrowsingMode() // Or could just stay here, depends on desired UX
+		}
+	} else {
+		popView(navigationStack) // Pop the browsing stack
+	}
+}
+
+// handleEmotionSelected is the central callback for emotion selection in ANY mode.
+// It delegates to mode-specific handlers.
+func handleEmotionSelected(selectedEmotion data.Emotion) {
+	log.Printf("Emotion selected: '%s' (ID: %s) in Mode: %v", selectedEmotion.Name, selectedEmotion.ID, currentMode)
+	if currentMode == ModeLogging {
+		handleLogEmotionSelection(selectedEmotion)
+	} else {
+		handleBrowseEmotionSelection(selectedEmotion)
+	}
+}
+
+// handleBrowseEmotionSelection handles navigation when an emotion is selected in browsing mode.
+func handleBrowseEmotionSelection(selectedEmotion data.Emotion) {
+	children := core.GetChildrenOf(selectedEmotion.ID, emotionData.Emotions)
+	log.Printf("[Browse] Found %d children for '%s'.", len(children), selectedEmotion.Name)
+
+	if len(children) > 0 {
+		title := fmt.Sprintf("Exploring: %s", selectedEmotion.Name)
+		// Create and push the new view onto the browsing stack
+		childView := createEmotionListView(title, &selectedEmotion, children, handleEmotionSelected) // Use central handler
+		pushView(childView, navigationStack)
+	} else {
+		// Leaf node in browsing mode - maybe show details in the future
+		log.Printf("[Browse] Leaf Node: '%s'. (Detail view TBD)", selectedEmotion.Name)
+		dialog.ShowInformation("Emotion Details", fmt.Sprintf("Selected: %s\n(More details could be shown here)", selectedEmotion.Name), mainWindow)
+	}
+}
+
+// handleLogEmotionSelection handles navigation or saving when an emotion is selected in logging mode.
+func handleLogEmotionSelection(selectedEmotion data.Emotion) {
+	children := core.GetChildrenOf(selectedEmotion.ID, emotionData.Emotions)
+	log.Printf("[Log] Found %d children for '%s'.", len(children), selectedEmotion.Name)
+
+	if len(children) > 0 {
+		// Navigate deeper within logging mode
+		title := fmt.Sprintf("Log > %s > ...", selectedEmotion.Name)                                 // Shorter title
+		childView := createEmotionListView(title, &selectedEmotion, children, handleEmotionSelected) // Use central handler
+		pushView(childView, loggingNavigationStack)
+	} else {
+		// Leaf node selected in logging mode - Log it!
+		log.Printf("[Log] Leaf Node: '%s'. Attempting to save.", selectedEmotion.Name)
+		saveLoggedEmotion(selectedEmotion) // Encapsulate saving logic
+		switchToBrowsingMode()             // Return to browsing after attempting save
+	}
+}
+
+// saveLoggedEmotion handles the process of saving a selected emotion to the journal.
+func saveLoggedEmotion(emotionToLog data.Emotion) {
+	entry := journal.LogEntry{
+		Timestamp:   time.Now(),
+		EmotionID:   emotionToLog.ID,
+		EmotionName: emotionToLog.Name,
+		Notes:       "", // Notes field exists but is empty for now
+	}
+
+	err := journal.SaveLogEntry(entry)
+	if err != nil {
+		log.Printf("ERROR: Failed to save log entry for '%s': %v", emotionToLog.Name, err)
+		dialog.ShowError(fmt.Errorf("failed to save journal entry: %w", err), mainWindow)
+	} else {
+		log.Printf("[Log] Entry for '%s' saved successfully.", emotionToLog.Name)
+		dialog.ShowInformation("Logged", fmt.Sprintf("Successfully logged: %s", emotionToLog.Name), mainWindow)
+	}
+}
+
+// --- Mode Switching Logic ---
+
+// switchToLoggingMode prepares the UI for emotion logging.
+func switchToLoggingMode() {
+	if currentMode == ModeLogging {
+		log.Println("Already in logging mode.")
+		return // Avoid redundant setup
+	}
+	log.Println("Switching to Logging Mode...")
+	currentMode = ModeLogging
+
+	// Clear the previous logging stack to start fresh
+	logNavStack := make([]fyne.CanvasObject, 0, 5)
+	loggingNavigationStack = &logNavStack
+
+	// Create and push the initial logging view (primary emotions)
+	initialLogView := createEmotionListView("Select Feeling to Log", nil, primaryEmotions, handleEmotionSelected)
+	pushView(initialLogView, loggingNavigationStack) // Push to the now active logging stack
+
+	mainWindow.SetTitle(logModeTitle) // Update window title
+	// updateContentFromActiveStack() is called by pushView
+	// updateBackButtonState() is called by pushView
+	mainWindow.Show()         // Ensure window is visible
+	mainWindow.RequestFocus() // Bring to front
+}
+
+// switchToBrowsingMode returns the UI to the standard emotion browsing state.
+func switchToBrowsingMode() {
+	if currentMode == ModeBrowsing {
+		log.Println("Already in browsing mode.")
+		return
+	}
+	log.Println("Switching to Browsing Mode...")
+	currentMode = ModeBrowsing
+
+	// Clear the logging stack (optional, good for memory if logging stack could get deep)
+	// logNavStack := make([]fyne.CanvasObject, 0, 5)
+	// loggingNavigationStack = &logNavStack
+
+	mainWindow.SetTitle(browseModeTitle) // Reset window title
+	updateContentFromActiveStack()       // Display the top of the browsing stack
+	updateBackButtonState()              // Update button based on browsing stack
+	log.Println("Switched back to Browsing Mode.")
+}
+
+// --- View Creation Helper ---
+
+// createEmotionListView wraps the call to the UI package's function.
+// It now only needs the selection callback, as back is handled globally.
+// NOTE: This assumes ui.CreateEmotionListView can be called without back button params.
+// If ui.CreateEmotionListView *requires* back params, we need to adjust it or this wrapper.
+// For now, let's assume the old ui.CreateEmotionListView is still used, taking nil/"" for back.
+func createEmotionListView(
+	title string,
+	parent *data.Emotion, // Optional parent context
+	emotions []data.Emotion,
+	onSelect func(data.Emotion),
+) fyne.CanvasObject {
+	log.Printf("Creating view wrapper: '%s' with %d emotions.", title, len(emotions))
+	// --- UPDATED CALL: Removed the nil and "" arguments ---
+	return ui.CreateEmotionListView(
+		title,
+		parent,
+		emotions,
+		onSelect, // Pass the central selection handler
+	)
+}
+
+// --- System Tray & Window Intercepts ---
+
+func setupSystemTray() {
 	if desk, ok := myApp.(desktop.App); ok {
 		log.Println("System tray supported. Setting up...")
+		m := fyne.NewMenu(appName,
+			fyne.NewMenuItem("Show Window", func() {
+				log.Println("Tray: Show Window clicked.")
+				mainWindow.Show()
+				mainWindow.RequestFocus() // Good practice to focus
+			}),
+			fyne.NewMenuItem("Log Current Feeling...", func() {
+				log.Println("Tray: Log Current Feeling... clicked.")
+				switchToLoggingMode() // Use the mode switch function
+			}),
+			fyne.NewMenuItemSeparator(),
+			fyne.NewMenuItem("Quit", func() {
+				log.Println("Tray: Quit clicked.")
+				myApp.Quit()
+			}),
+		)
+		// Consider using a specific icon resource later
+		desk.SetSystemTrayIcon(theme.FyneLogo())
+		desk.SetSystemTrayMenu(m)
+		log.Println("System tray menu set.")
+	} else {
+		log.Println("System tray not supported on this platform.")
+	}
+}
 
-		// --- Create Menu Items ---
-		showItem := fyne.NewMenuItem("Show Window", func() {
-			log.Println("Showing main window via tray menu.")
-			mainWindow.Show()
-			mainWindow.RequestFocus()
-		})
+func setupWindowIntercepts() {
+	// Intercept close requests
+	mainWindow.SetCloseIntercept(func() {
+		log.Println("Main window close intercepted.")
+		if currentMode == ModeLogging {
+			// Optional: Ask for confirmation before cancelling logging?
+			// dialog.ShowConfirm("Cancel Log?", "Closing the window will cancel the current log entry. Proceed?", func(confirm bool) {
+			// 	if confirm {
+			// 		log.Println("Logging cancelled by closing window (confirmed).")
+			// 		switchToBrowsingMode() // Switch back first
+			// 		mainWindow.Hide()      // Then hide
+			// 	} else {
+			// 		log.Println("Window close cancelled by user.")
+			// 	}
+			// }, mainWindow)
+			// --- For now, just cancel and hide ---
+			log.Println("Window closed during logging. Cancelling log and hiding window.")
+			switchToBrowsingMode() // Ensure state is reset
+			mainWindow.Hide()
+			// ---
+		} else {
+			log.Println("Hiding window (Browsing Mode).")
+			mainWindow.Hide() // Default behavior: hide if tray is supported
+		}
+	})
 
-		// *** UPDATE Log Feeling Item Action ***
-		logFeelingItem := fyne.NewMenuItem("Log Current Feeling...", func() {
-			log.Println("Log Current Feeling... menu item clicked. Switching to Log Mode.")
-			// Don't save dummy data anymore. Instead, trigger the logging UI flow.
-			showLoggingSelectionView() // Call the function to display the selection UI
-
-			// Ensure the main window is visible
-			mainWindow.Show()
-			mainWindow.RequestFocus()
-		})
-		// *** END UPDATE ***
-
-		quitItem := fyne.NewMenuItem("Quit", func() {
-			log.Println("Quitting application via tray menu.")
+	// Fallback if tray isn't supported (already handled by Fyne implicitly, but explicit is okay)
+	if _, ok := myApp.(desktop.App); !ok {
+		mainWindow.SetCloseIntercept(func() {
+			log.Println("Close intercepted (no tray support). Quitting.")
 			myApp.Quit()
 		})
-
-		// --- Create the Menu --- (No changes)
-		trayMenu := fyne.NewMenu("Emotion Explorer",
-			showItem,
-			logFeelingItem,
-			fyne.NewMenuItemSeparator(),
-			quitItem,
-		)
-
-		// Set the Tray Icon and Menu (No changes)
-		trayIcon := theme.FyneLogo()
-		desk.SetSystemTrayIcon(trayIcon)
-		desk.SetSystemTrayMenu(trayMenu)
-
-		// Intercept Window Close Requests (No changes)
-		mainWindow.SetCloseIntercept(func() {
-			// If in logging mode, maybe ask confirmation before hiding? For now, just hide.
-			if currentMode == ModeLogging {
-				log.Println("Main window close intercepted during logging. Hiding window (logging cancelled implicitly).")
-				// Implicitly cancel logging if window is closed during the process
-				cancelLogging() // Switch back to browsing mode
-			} else {
-				log.Println("Main window close intercepted during browsing. Hiding window.")
-			}
-			mainWindow.Hide()
-		})
-
-	} else {
-		log.Println("System tray not supported on this system (app does not implement desktop.App).")
 	}
-	// --- End System Tray Setup ---
-
-	// --- 7. Show Window and Run App ---
-	log.Println("Showing window and running app...")
-	mainWindow.ShowAndRun()
-
-	log.Println("Application finished.")
+	log.Println("Window close intercept setup complete.")
 }
