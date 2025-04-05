@@ -1,0 +1,13 @@
+[
+  {
+    "timestamp": "2025-04-05T04:51:02.3902421-05:00",
+    "emotion_id": "joy-01",
+    "emotion_name": "Joy",
+    "notes": "Logged via system tray menu (placeholder)."
+  },
+  {
+    "timestamp": "2025-04-05T04:53:48.5172807-05:00",
+    "emotion_id": "inspired",
+    "emotion_name": "Inspired"
+  }
+]
